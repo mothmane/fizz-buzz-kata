@@ -414,7 +414,11 @@ public class ReplacementRule {
 _tests results : green_
 
 ##### refractoring 4 :
-let's make trhe number of rule not fixed to two but non limited.
+
+Let's make the number of rules not fixed to two but non limited.
+
+We can consider our engine as  list of replacement rule that we stream and each time the rule apply we replace the number with the correpondant replacement and then we concat all the returned strings.
+
 ```java
 
 public class ReplacementEngine {
@@ -424,7 +428,7 @@ public class ReplacementEngine {
     this.replacementRules=List.of(new ReplacementRule(i-> i%3==0,"Fizz"), new ReplacementRule(i-> i%5==0,"Buzz"));
   }
   public String apply(int i) {
-    return replacementRules.stream()
+    return replacementRules.stream() 
         .filter(r -> r.getRule().test(i))
         .map(ReplacementRule::getReplacement)
         .reduce(String::concat)
@@ -437,7 +441,7 @@ _tests results : green_
 
 ##### refractoring 4 :
 
-We can now offer a constructur that help client,  configure  his initial fizzbuzz whenever he want.
+We can now offer a constructur that help client,configure  his initial fizzbuzz whenever he want.
 
 ```java
 
