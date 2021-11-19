@@ -1,12 +1,12 @@
-#   TDD and Open/Closed Principale applyed FizzBuzz Kata 
+#   TDD and Open/Closed Principle applied to FizzBuzz Kata 
 
-In this article we will see how the **TDD** and the  (S**O**LID) **Open/Closed principale** can help simple and quite extendable fizzbuzz kata solution.
+In this article we will see how the **TDD** and the  (S**O**LID) **Open/Closed principle** can help us create a clean and extendable fizzbuzz kata solution.
 
 ### What You Need
 
 Any text editor or IDE
 
- - JDK 1.8 or later
+ - JDK 1.8 or later (we are using 17)
 
  - Gradle 4+
 
@@ -44,11 +44,11 @@ dependencies {
 
 ##### Step 1
 
-Let's write a first test and then make it pass it with the simplest solution.
+Let's write a first test and then make it pass with the simplest solution.
 
 ```java
 class FizzBuzzTest {
-  FizzBuzz fizzbuzz= new FizzBuzz();
+  FizzBuzz fizzbuzz = new FizzBuzz();
   @Test
   void should_return_1_when_input_is_1() {
     assertThat(fizzbuzz.apply(1)).isEqualTo("1");
@@ -70,7 +70,7 @@ _tests results : green _
 
 ##### Step 2
 
-Write a second test and make sure the new implementation validate both tests
+Write a second test and make sure the new implementation validates both tests
 
 ```java
 class FizzBuzzTest {
@@ -297,10 +297,11 @@ class FizzBuzzTest {
 
 _tests results : green_
 
-##### Bilan :
+##### to summarize :
 
-First we have an implementation of FizzBuzz that is working, is tested, that can be "ready to production" ,second, now as a side effect of **TDD**, the coverage is quite high, we covered a lot of usecases,
-and this can help us refactor mercilessly our code. 
+First we have a working, well tested, and "ready to production"  implementation of FizzBuzz, 
+second,  as a side effect of **TDD**, the coverage is quite high, 
+we covered a lot of use cases and this can help us refactor mercilessly our code. 
 The tests being green is an absolute guarantee that our code has no error,
 It make us confident in test capacity to detect any potential regression.
 
@@ -308,9 +309,9 @@ Let's refactor the code and make it better.
 
 ##### refractoring 1 :
 
-First let get rid of the line with the number 15 in it, 
-in the kata problem description the number '15' is not mentionned once,
-it's was just our solution to return 'FizzBuzz' when a number is both multiple of 3 and 5,
+First let's get rid of the line with the number 15 in it, 
+in the kata problem description the number '15' is not mentioned once,
+it's was just our solution to return 'FizzBuzz' when a number is both multiple of 3 and 5.
 
 ```java
 
@@ -318,12 +319,12 @@ public class FizzBuzz {
   
   public String apply(int input){
 
-      String value="";
-      if(input % 3 ==0)
-        value="Fizz";
-      if(input % 5 ==0)
-        value=value+ "Buzz";
-      return value.isEmpty()?String.valueOf(input):value;
+      String value = "";
+      if(input % 3 == 0)
+        value = "Fizz";
+      if(input % 5 == 0)
+        value = value + "Buzz";
+      return value.isEmpty() ?  String.valueOf(input) :v  alue;
   }
 }
 ```
@@ -334,22 +335,22 @@ Our code now is better, but it still lacks an important property wish is extensi
 
 Whenever the FizzBuzz requirement changes, we will need to edit and recompile the FizzBuzz class code,
 
-if this class were sealed in a module or a jar, there will be no way to add or change behavior,
-without creating a new implementation via inheritance,
+if this class was sealed in a module or a jar, there will be no way to add or change behavior
+without creating a new implementation via inheritance.
 
-this class is closed to extension.
+This class is closed to extension.
 
-In the next refactoring steps we will try to reverse this tendency and make it open to extension, closed to modification
+In the next refactoring steps we will try to reverse this tendency and make it open to extension, closed to modification.
 
 
 ```java
 
 public class FizzBuzz {  
   
-  Predicat<Integer> moduloThree= i -> input % 3 ==0;
+  Predicate<Integer> moduloThree= i -> input % 3 ==0;
   String fizz = "Fizz";
   
-  Predicat<Integer> moduloFive= i -> input % 5 ==0;
+  Predicate<Integer> moduloFive= i -> input % 5 ==0;
   String buzz = "Buzz";
   
   public String apply(int input){
@@ -413,9 +414,9 @@ _tests results : green_
 
 ##### refractoring 4 :
 
-Let's make the number of rules not fixed to two but non limited.
+Let's make the number of rules unlimited.
 
-We can consider our engine as  list of replacement rule that we stream and each time the rule condition apply we replace the input number with the correpondant replacement and then we concat all the returned strings.
+We can consider our engine as list of replacement rules that we stream and each time the rule condition apply we replace the input number with the correspondent replacement and then we concatenate all the returned strings.
 
 ```java
 
@@ -437,41 +438,9 @@ public class ReplacementEngine {
 
 _tests results : green_
 
-##### refractoring 4 :
+##### refractoring 5 :
 
-We can now offer a constructur that help client,configure  his initial fizzbuzz whenever he want.
-
-```java
-
-public class ReplacementEngine {
-  private List<ReplacementRule> replacementRules;
-
-  public ReplacementEngine() {
-    this.replacementRules=List.of(new ReplacementRule(i-> i%3==0,"Fizz"), new ReplacementRule(i-> i%5==0,"Buzz"));
-  }
-
-  public ReplacementEngine(List<ReplacementRule> replacementRules) {
-    this.replacementRules=replacementRules;
-  }
-  public String apply(int i) {
-    return replacementRules.stream()
-        .filter(r -> r.getRule().test(i))
-        .map(ReplacementRule::getReplacement)
-        .reduce(String::concat)
-        .orElse(String.valueOf(i));
-  }
-}
-```
-
-_tests results : green_
-
-
-
-
-##### extend the engine behavior by test client  :
-
-we can see how without modifiyinn the code our client code can extend the  behavior 
-
+We can now offer a constructor that help clients configure their own rules.
 
 ```java
 class ReplacementEngineTest {
@@ -499,43 +468,50 @@ class ReplacementEngineTest {
 }
 ```
 
+```java
+
+public class ReplacementEngine {
+  private List<ReplacementRule> replacementRules;
+
+  public ReplacementEngine() {
+    this.replacementRules=List.of(new ReplacementRule(i-> i%3==0,"Fizz"), new ReplacementRule(i-> i%5==0,"Buzz"));
+  }
+
+  public ReplacementEngine(List<ReplacementRule> replacementRules) {
+    this.replacementRules=replacementRules;
+  }
+  public String apply(int i) {
+    return replacementRules.stream()
+        .filter(r -> r.getRule().test(i))
+        .map(ReplacementRule::getReplacement)
+        .reduce(String::concat)
+        .orElse(String.valueOf(i));
+  }
+}
+```
+
+_tests results : green_
+
+##### the fizz buzz demo  :
 
 ```java
+
 public class MainClass {
 
-public void fizzBuzzUseCase() {
-ReplacementEngine fizzBuzz = new ReplacementEngine();
-IntStream.range(1, 101).forEach(i -> System.out.println(fizzBuzz.apply(i)));
-}
-
-public void extendedUseCase() {
-ReplacementEngine moneyEngine = new ReplacementEngine(List.of(
-new ReplacementRule(i -> i % 1 == 0, "$"),
-new ReplacementRule(i -> i % 2 == 0, "$$"),
-new ReplacementRule(i -> i % 3 == 0, "$$$"),
-new ReplacementRule(i -> i % 4 == 0, "$$$$"),
-new ReplacementRule(i -> i % 5 == 0, "$$$$$"),
-new ReplacementRule(i -> i % 6 == 0, "$$$$$$"),
-new ReplacementRule(i -> i % 7 == 0, "$$$$$$$"),
-new ReplacementRule(i -> i % 8 == 0, "$$$$$$$$"),
-new ReplacementRule(i -> i % 9 == 0, "$$$$$$$$$"),
-new ReplacementRule(i -> i % 10 == 0, "----------------"),
-new ReplacementRule(i -> i == 100, "This is the End")
-)
-
-    );
-    IntStream.range(1, 101).forEach(i -> System.out.println(moneyEngine.apply(i)));
-}
-
-public static void main(String[] args) {
-new MainClass().fizzBuzzUseCase();
-new MainClass().extendedUseCase();
-}
-
-
+  public void fizzBuzzUseCase() {
+    ReplacementEngine fizzBuzz = new ReplacementEngine();
+    IntStream.range(1, 101).forEach(i -> System.out.println(fizzBuzz.apply(i)));
+  }
+  
+  public static void main(String[] args) {
+    new MainClass().fizzBuzzUseCase();
+  }
+  
 }
 
 ```
+
+
 
 <!-- CONTACT -->
 ## Contact
