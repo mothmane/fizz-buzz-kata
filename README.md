@@ -1,6 +1,6 @@
-#   TDD and Open/Closed Principal applyed FizzBuzz Kata 
+#   TDD and Open/Closed Principale applyed FizzBuzz Kata 
 
-In this article we will see how the **TDD** and the  (S**O**LID) **Open/Closed principal** can help simple and quite extendable fizzbuzz kata solution.
+In this article we will see how the **TDD** and the  (S**O**LID) **Open/Closed principale** can help simple and quite extendable fizzbuzz kata solution.
 
 ### What You Need
 
@@ -332,14 +332,12 @@ _tests results : green_
 ##### refractoring 2 :
 Our code now is better, but it still lacks an important property wish is extensibility.
 
-Whenever the FizzBuzz requirement changes, we will need to modify the FizzBuzz class, 
-adding new if statements, changing modulo values, 
-each small requirement change means class should change.
+Whenever the FizzBuzz requirement changes, we will need to edit and recompile the FizzBuzz class code,
 
 if this class were sealed in a module or a jar, there will be no way to add or change behavior,
 without creating a new implementation via inheritance,
 
-this class is  closed to extension, the only way to change it behavior is to modify it,
+this class is closed to extension.
 
 In the next refactoring steps we will try to reverse this tendency and make it open to extension, closed to modification
 
@@ -417,7 +415,7 @@ _tests results : green_
 
 Let's make the number of rules not fixed to two but non limited.
 
-We can consider our engine as  list of replacement rule that we stream and each time the rule apply we replace the number with the correpondant replacement and then we concat all the returned strings.
+We can consider our engine as  list of replacement rule that we stream and each time the rule condition apply we replace the input number with the correpondant replacement and then we concat all the returned strings.
 
 ```java
 
