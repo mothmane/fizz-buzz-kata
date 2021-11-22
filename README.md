@@ -66,7 +66,7 @@ public class  FizzBuzz {
 }
 ```
 
-_tests results : green _
+_tests results : green_
 
 ##### interation 2
 
@@ -101,9 +101,9 @@ public class  FizzBuzz {
 ```
 _tests results : green_
 
-##### iteration 2 :  refactoring
+##### iteration 2  (refactoring)
 
-At this point, our tests are basically identical (except for input and expected result),so let's create a junit parameterized test.
+At this point, our tests are basically identical except for input and expected result,so let's create a junit parameterized test.
 
 ```java
 class FizzBuzzTest {
@@ -112,7 +112,7 @@ class FizzBuzzTest {
   
   @ParameterizedTest(name = "should return {1} when input is {0}")
   @CsvSource({"1,1", "2,2"})
-  void should_return_the_expected_string(int input,String expected) {
+  void should_return_the_expected_string(int input, String expected) {
     assertThat(fizzbuzz.apply(input)).isEqualTo(expected);
   }
 }
@@ -142,7 +142,7 @@ _tests results : red_
 
 public class FizzBuzz {
 public String apply(int input){
-    if(input % 3 ==0)
+    if(input % 3 == 0)
        return "Fizz";
     return String.valueOf(input);
 }
@@ -333,17 +333,18 @@ public class FizzBuzz {
 ```
 _tests results : green_
 
-##### refractoring 2 :
-Our code now is better, but it still lacks an important property wish is extensibility.
+##### iteration 2
+
+Our code is better, but it still lacks an important property wish is extensibility.
 
 Whenever the FizzBuzz requirement changes, we will need to edit and recompile the FizzBuzz class code,
 
-if this class was sealed in a module or a jar, there will be no way to add or change behavior
-without creating a new implementation via inheritance.
+if this class was sealed in a jar, there will be no way to add or change behavior
+unless we create a new implementation.
 
 This class is closed to extension.
 
-In the next refactoring steps we will try to reverse this tendency and make it open to extension, closed to modification.
+In the next refactoring steps we will try to reverse this tendency and make it open to extension.
 
 
 ```java
@@ -372,6 +373,7 @@ _tests results : green_
 
 ##### refractoring 3 :
 
+Let's group the predicate with the associate replacement value.
 
 ```java
 
@@ -427,62 +429,6 @@ _tests results : green_
 
 ##### iteration 4
 
-
-```java
-
-public class FizzBuzz {
-
-  ReplacementRule fizzReplacementRule=  new ReplacementRuleImpl(i -> input % 3 ==0,"Fizz");
-  ReplacementRule buzzReplacementRule=  new ReplacementRuleImpl(i -> input % 5 ==0,"Buzz");
- 
-  
-  public String apply(int input){
-
-      String value="";
-      if(fizzReplacementRule.appliable(input))
-        value=fizzReplacementRule.getReplacement();
-      if(buzzReplacementRule.appliable(input))
-        value=value+ fizzReplacementRule.getRule();
-      return value.isEmpty()?String.valueOf(input):value;
-  }
-}
-```
-
-```java
-
-public interface ReplacementRule {
-
-   boolean appliable(Integer i);
-
-   String  getReplacement();
-}
-
-```
-
-```java
-public class ReplacementRuleImpl {
-
-  private Predicate<Integer> rule;
-  private Supplier<String> replacementSupplier;
-
-  public ReplacementRuleImpl(Predicate<Integer> rule, Supplier<String>  replacementSupplier) {
-    this.rule = rule;
-    this.replacementSupplier = replacementSupplier;
-  }
-
-  public boolean appliable(Integer i) {
-    return rule.test(i);
-  }
-
-  public String getReplacement() {
-    return replacementSupplier.get();
-  }
-}
-```
-_tests results : green_
-
-##### iteration 5
-
 we can change the two replacement rules to  a list of rules, that we stream and each time the rule condition applies we replace the input number with the correspondent replacement and then we concatenate all the returned strings.
 
 
@@ -513,7 +459,8 @@ public class FizzBuzz {
 
 ##### iteration 5 
 
- We can create a good level of abstraction for our replacement engine,
+ We can create a good level of abstraction for our replacement engine. by creating an interface, a default implementation, and a FizzBuzz imolementation,
+
 
 ```java
 
@@ -565,7 +512,9 @@ _tests results : green_
 
 ##### refractoring 5 :
 
-We can now offer a constructor that help clients configure their own rules.
+Now our replacement engine implmements  the  fizz buzz kata , but can be used in more complicated scenarios,
+our client code can inject behavior into different point, it can inject new replacement rules, to create a new engine from teh default one, 
+the code client can use a hole new specific implementation of the replacement engine if the default one is not as axtensible as our client needs.
 
 ```java
 
@@ -596,28 +545,6 @@ class ReplacementEngineTest {
 
 ```
 
-```java
-
-public class ReplacementEngine {
-  private List<ReplacementRule> replacementRules;
-
-  public ReplacementEngine() {
-    this.replacementRules=List.of(new ReplacementRule(i-> i%3==0,"Fizz"), new ReplacementRule(i-> i%5==0,"Buzz"));
-  }
-
-  public ReplacementEngine(List<ReplacementRule> replacementRules) {
-    this.replacementRules=replacementRules;
-  }
-  public String apply(int i) {
-    return replacementRules.stream()
-        .filter(r -> r.getRule().test(i))
-        .map(ReplacementRule::getReplacement)
-        .reduce(String::concat)
-        .orElse(String.valueOf(i));
-  }
-}
-```
-
 _tests results : green_
 
 ##### the fizz buzz demo  :
@@ -626,20 +553,30 @@ _tests results : green_
 
 public class MainClass {
 
-  public void fizzBuzzUseCase() {
-    ReplacementEngine fizzBuzz = new ReplacementEngine();
-    IntStream.range(1, 101).forEach(i -> System.out.println(fizzBuzz.apply(i)));
-  }
-  
   public static void main(String[] args) {
     new MainClass().fizzBuzzUseCase();
+    System.out.println();
+    new MainClass().extendedUseCase();
+  }
+
+  public void fizzBuzzUseCase() {
+    ReplacementEngine fizzBuzz = new FizzBuzz();
+    IntStream.range(1, 101).forEach(i -> System.out.print(fizzBuzz.apply(i) + " "));
+  }
+
+  public void extendedUseCase() {
+    ReplacementEngine moneyEngine = new ReplacementEngineDefault(
+        List.of(
+            new ReplacementRuleImpl(i -> i % 10 == 0, () -> "--------Multiple of ten--------"),
+            new ReplacementRuleImpl(i -> i == 100, () -> "This is the End")
+        )
+    );
+    IntStream.range(1, 101).forEach(i -> System.out.println(moneyEngine.apply(i)));
   }
   
 }
 
 ```
-
-
 
 <!-- CONTACT -->
 ## Contact
