@@ -30,7 +30,7 @@ Write a program that prints one line for each number from 1 to 100
 
 ### Step by step solution
 
-First let's configure our dependencies by adding the below lines to our gradle.build file dependencies section
+First let's configure our dependencies by adding the below lines to our gradle.build file dependencies section.
 
 ```groovy
 
@@ -70,7 +70,7 @@ _tests results : green_
 
 ##### interation 2
 
-Write a second test and make sure the new implementation validates both tests
+Write a second test and make sure the new implementation validates both tests.
 
 ```java
 class FizzBuzzTest {
@@ -459,7 +459,7 @@ public class FizzBuzz {
 
 ##### iteration 5 
 
- We can create a good level of abstraction for our replacement engine. by creating an interface, a default implementation, and a FizzBuzz imolementation,
+ We can create a good level of abstraction for our replacement engine. by creating an interface, a default implementation, and a FizzBuzz implementation.
 
 
 ```java
