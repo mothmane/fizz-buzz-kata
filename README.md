@@ -6,7 +6,7 @@ In this article we will see how the **TDD** and the  (S**O**LID) **Open/Closed p
 
 Any text editor or IDE
 
- - JDK 1.8 or later (we are using 17)
+ - JDK 11 or later (we are using 17)
 
  - Gradle 4+
 
@@ -30,7 +30,7 @@ Write a program that prints one line for each number from 1 to 100
 
 ### Step by step solution
 
-First let's configure our dependencies by adding the below lines to our gradle.build file dependencies section:
+First let's configure our dependencies by adding the below lines to our gradle.build file dependencies section
 
 ```groovy
 
@@ -42,7 +42,7 @@ dependencies {
 }
 ```
 
-##### Step 1
+##### iteration 1
 
 Let's write a first test and then make it pass with the simplest solution.
 
@@ -68,7 +68,7 @@ public class  FizzBuzz {
 
 _tests results : green _
 
-##### Step 2
+##### interation 2
 
 Write a second test and make sure the new implementation validates both tests
 
@@ -101,7 +101,7 @@ public class  FizzBuzz {
 ```
 _tests results : green_
 
-##### iteration 2 : refactoring
+##### iteration 2 :  refactoring
 
 At this point, our tests are basically identical (except for input and expected result),so let's create a junit parameterized test.
 
@@ -119,7 +119,7 @@ class FizzBuzzTest {
 ```
 _tests results : green _
 
-##### iteration 3 : 
+##### iteration 3 
 
 Let's add the third test and  make it pass.
 
@@ -151,7 +151,7 @@ public String apply(int input){
 
 _tests results : green_
 
-##### iteration 4 :
+##### iteration 4
 
 Another test ...
 
@@ -169,7 +169,7 @@ class FizzBuzzTest {
 ```
 _tests results : green_
 
-##### iteration 5 :
+##### iteration 5
 
 Add a test that will test the 'Buzz' output.
 
@@ -203,7 +203,7 @@ public class FizzBuzz {
 _tests results : green_
 
 
-##### iteration 6 :
+##### iteration 6
 
 Continue adding more tests.
 
@@ -221,7 +221,7 @@ class FizzBuzzTest {
 ```
 _tests results : green_
 
-##### iteration 7 :
+##### iteration 7
 
 Continue adding more tests.
 
@@ -240,7 +240,7 @@ class FizzBuzzTest {
 
 _tests results : green_
 
-##### iteration 8 :
+##### iteration 8
 
 Add a 'FizzBuzz' output test use case and make it green. 
 
@@ -278,7 +278,7 @@ public class FizzBuzz {
 _tests results : green_
 
 
-##### iteration 9 :
+##### iteration 9
 
 Add more tests.
 
@@ -297,7 +297,7 @@ class FizzBuzzTest {
 
 _tests results : green_
 
-##### to summarize :
+##### to summarize
 
 First we have a working, well tested, and "ready to production"  implementation of FizzBuzz, 
 second,  as a side effect of **TDD**, the coverage is quite high, 
@@ -307,7 +307,10 @@ It make us confident in test capacity to detect any potential regression.
 
 Let's refactor the code and make it better.
 
-##### refractoring 1 :
+
+### refactoring 
+
+##### iteration 1
 
 First let's get rid of the line with the number 15 in it, 
 in the kata problem description the number '15' is not mentioned once,
@@ -374,16 +377,71 @@ _tests results : green_
 
 public class FizzBuzz {
 
-  ReplacementRule fizzReplacementRule=  new ReplacementRule(i -> input % 3 ==0,"Fizz");
-  ReplacementRule buzzReplacementRule=  new ReplacementRule(i -> input % 5 ==0,"Buzz");
+  ReplacementRule fizzReplacementRule=  new ReplacementRuleImpl(i -> input % 3 ==0,"Fizz");
+  ReplacementRule buzzReplacementRule=  new ReplacementRuleImpl(i -> input % 5 ==0,"Buzz");
  
   
   public String apply(int input){
 
       String value="";
-      if(fizzReplacementRule.getRule().test(input))
+      if(fizzReplacementRule.appliable(input))
         value=fizzReplacementRule.getReplacement();
-      if(buzzReplacementRule.getRule().test(input))
+      if(buzzReplacementRule.appliable(input))
+        value=value+ fizzReplacementRule.getReplacement();
+      return value.isEmpty()?String.valueOf(input):value;
+  }
+}
+```
+```java
+
+public interface ReplacementRule {
+
+   boolean appliable(Integer i);
+
+   String  getReplacement();
+}
+
+```
+```java
+
+public class ReplacementRuleImpl implements  ReplacementRule{
+
+  private Predicate<Integer> rule;
+  private Supplier<String> replacementSupplier;
+
+  public ReplacementRuleImpl(Predicate<Integer> rule, Supplier<String>  replacementSupplier) {
+    this.rule = rule;
+    this.replacementSupplier = replacementSupplier;
+  }
+
+  public boolean appliable(Integer i) {
+    return rule.test(i);
+  }
+
+  public String  getReplacement() {
+    return replacementSupplier.get();
+  }
+}
+```
+_tests results : green_
+
+##### iteration 4
+
+
+```java
+
+public class FizzBuzz {
+
+  ReplacementRule fizzReplacementRule=  new ReplacementRuleImpl(i -> input % 3 ==0,"Fizz");
+  ReplacementRule buzzReplacementRule=  new ReplacementRuleImpl(i -> input % 5 ==0,"Buzz");
+ 
+  
+  public String apply(int input){
+
+      String value="";
+      if(fizzReplacementRule.appliable(input))
+        value=fizzReplacementRule.getReplacement();
+      if(buzzReplacementRule.appliable(input))
         value=value+ fizzReplacementRule.getRule();
       return value.isEmpty()?String.valueOf(input):value;
   }
@@ -391,49 +449,116 @@ public class FizzBuzz {
 ```
 
 ```java
-public class ReplacementRule {
+
+public interface ReplacementRule {
+
+   boolean appliable(Integer i);
+
+   String  getReplacement();
+}
+
+```
+
+```java
+public class ReplacementRuleImpl {
 
   private Predicate<Integer> rule;
-  private String replacement;
+  private Supplier<String> replacementSupplier;
 
-  public ReplacementRule(Predicate<Integer> rule, String replacement) {
+  public ReplacementRuleImpl(Predicate<Integer> rule, Supplier<String>  replacementSupplier) {
     this.rule = rule;
-    this.replacement = replacement;
+    this.replacementSupplier = replacementSupplier;
   }
 
-  public Predicate<Integer> getRule() {
-    return rule;
+  public boolean appliable(Integer i) {
+    return rule.test(i);
   }
 
   public String getReplacement() {
-    return replacement;
+    return replacementSupplier.get();
   }
 }
 ```
 _tests results : green_
 
-##### refractoring 4 :
+##### iteration 5
 
-Let's make the number of rules unlimited.
+we can change the two replacement rules to  a list of rules, that we stream and each time the rule condition applies we replace the input number with the correspondent replacement and then we concatenate all the returned strings.
 
-We can consider our engine as list of replacement rules that we stream and each time the rule condition apply we replace the input number with the correspondent replacement and then we concatenate all the returned strings.
 
 ```java
 
-public class ReplacementEngine {
+public class FizzBuzz {
+
   private List<ReplacementRule> replacementRules;
 
-  public ReplacementEngine() {
-    this.replacementRules=List.of(new ReplacementRule(i-> i%3==0,"Fizz"), new ReplacementRule(i-> i%5==0,"Buzz"));
+  public FizzBuzz() {
+    this.replacementRules= Collections.unmodifiableList(
+        List.of(
+            new ReplacementRuleImpl(i -> i % 3 == 0, () -> "Fizz"),
+            new ReplacementRuleImpl(i -> i % 5 == 0, () -> "Buzz")
+        )
+    );
   }
-  public String apply(int i) {
-    return replacementRules.stream() 
-        .filter(r -> r.getRule().test(i))
+
+  public String apply(Integer i) {
+    return replacementRules.stream()
+        .filter(r -> r.appliable(i))
         .map(ReplacementRule::getReplacement)
         .reduce(String::concat)
         .orElse(String.valueOf(i));
   }
 }
+```
+
+##### iteration 5 
+
+ We can create a good level of abstraction for our replacement engine,
+
+```java
+
+public interface ReplacementEngine extends Function<Integer, String> {
+
+}
+
+```
+```java
+
+public class ReplacementEngineDefault implements ReplacementEngine {
+
+  private final List<ReplacementRule> replacementRules;
+
+  public ReplacementEngineDefault(List<ReplacementRule> replacementRules) {
+    this.replacementRules = Collections.unmodifiableList(replacementRules);
+  }
+
+  public String apply(Integer i) {
+    return replacementRules.stream()
+        .filter(r -> r.appliable(i))
+        .map(ReplacementRule::getReplacement)
+        .reduce(String::concat)
+        .orElse(String.valueOf(i));
+  }
+}
+
+```
+
+```java
+
+public class FizzBuzz extends ReplacementEngineDefault {
+
+  public static final String FIZZ = "Fizz";
+  public static final String BUZZ = "Buzz";
+
+  public FizzBuzz() {
+    super(
+        List.of(
+            new ReplacementRuleImpl(i -> i % 3 == 0, () -> FIZZ),
+            new ReplacementRuleImpl(i -> i % 5 == 0, () -> BUZZ))
+    );
+  }
+}
+
 ```
 
 _tests results : green_
@@ -443,29 +568,32 @@ _tests results : green_
 We can now offer a constructor that help clients configure their own rules.
 
 ```java
+
 class ReplacementEngineTest {
 
-  ReplacementEngine fizzbuzz = new ReplacementEngine();
+  ReplacementEngine fizzbuzz = new FizzBuzz();
 
-  ReplacementEngine blabliOupla = new ReplacementEngine(
-      List.of(new ReplacementRule(i-> i%7==0,"Bla")
-          , new ReplacementRule(i-> i%8==0,"Bli"),
-          new ReplacementRule(i-> i==100,"Oupla")));
+  ReplacementEngine blabliOupla = new ReplacementEngineDefault(
+      List.of(new ReplacementRuleImpl(i -> i % 7 == 0, () -> "Bla")
+          , new ReplacementRuleImpl(i -> i % 8 == 0, () -> "Bli"),
+          new ReplacementRuleImpl(i -> i == 100, () -> "Oupla")));
 
   @ParameterizedTest(name = "should return {1} when input is {0}")
-  @CsvSource({"1,1", "2,2", "3,Fizz","4,4","5,Buzz","6,Fizz","10,Buzz","15,FizzBuzz","39,Fizz","45,FizzBuzz"})
-  void should_return_the_expected_string(int input,String expected) {
+  @CsvSource({"1,1", "2,2", "3,Fizz", "4,4", "5,Buzz", "6,Fizz", "10,Buzz", "15,FizzBuzz",
+      "39,Fizz", "45,FizzBuzz"})
+  void test_fizzBuzz(int input, String expected) {
     assertThat(fizzbuzz.apply(input)).isEqualTo(expected);
   }
 
   @ParameterizedTest(name = "should return {1} when input is {0}")
-  @CsvSource({"1,1", "2,2", "3,3","4,Bla","5,5","7,Bli","56,BlaBli","100,Oupla","101,101"})
-  void should_return_the_expected_string(int input,String expected) {
-    assertThat(fizzbuzz.apply(input)).isEqualTo(expected);
+  @CsvSource({"1,1", "2,2", "3,3", "4,4", "5,5", "7,Bla", "56,BlaBli", "100,Oupla", "101,101"})
+  void test_for_bla_bli_blou(int input, String expected) {
+    assertThat(blabliOupla.apply(input)).isEqualTo(expected);
   }
 
 
 }
+
 ```
 
 ```java

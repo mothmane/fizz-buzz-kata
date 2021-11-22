@@ -3,17 +3,20 @@ package ma.toto;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import ma.toto.engine.ReplacementEngine;
+import ma.toto.engine.ReplacementEngineDefault;
+import ma.toto.rules.ReplacementRuleImpl;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 class ReplacementEngineTest {
 
-  ReplacementEngine fizzbuzz = new ReplacementEngine();
+  ReplacementEngine fizzbuzz = new FizzBuzz();
 
-  ReplacementEngine blabliOupla = new ReplacementEngine(
-      List.of(new ReplacementRule(i -> i % 7 == 0, "Bla")
-          , new ReplacementRule(i -> i % 8 == 0, "Bli"),
-          new ReplacementRule(i -> i == 100, "Oupla")));
+  ReplacementEngine blabliOupla = new ReplacementEngineDefault(
+      List.of(new ReplacementRuleImpl(i -> i % 7 == 0, () -> "Bla")
+          , new ReplacementRuleImpl(i -> i % 8 == 0, () -> "Bli"),
+          new ReplacementRuleImpl(i -> i == 100, () -> "Oupla")));
 
   @ParameterizedTest(name = "should return {1} when input is {0}")
   @CsvSource({"1,1", "2,2", "3,Fizz", "4,4", "5,Buzz", "6,Fizz", "10,Buzz", "15,FizzBuzz",
