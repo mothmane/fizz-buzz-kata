@@ -117,7 +117,7 @@ class FizzBuzzTest {
   }
 }
 ```
-_tests results : green _
+_tests results : green_
 
 ##### iteration 3 
 
